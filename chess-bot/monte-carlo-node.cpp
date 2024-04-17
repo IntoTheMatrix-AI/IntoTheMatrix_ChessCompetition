@@ -38,3 +38,12 @@ float jneoy::MonteCarloNode::GetUCT()
 
 	return firstTerm + secondTerm;
 }
+
+
+MonteCarloNode jneoy::MonteCarloNode::ExpandRandomMove()
+{
+	if (numNonExpandedMoves == 0) throw std::out_of_range("No non-expanded moves!");
+
+	int index = rand() % numNonExpandedMoves;
+	nonExpandedMoves[index] = chess::Move();
+}

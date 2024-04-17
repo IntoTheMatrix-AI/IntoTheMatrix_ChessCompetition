@@ -6,6 +6,8 @@
 
 namespace jneoy
 {
+	// TODO: Handle edge case of no valid children to expand with this node
+
 	struct MonteCarloNode
 	{
 		const float C = sqrtf(2);
@@ -14,6 +16,8 @@ namespace jneoy
 		MonteCarloNode* parent;
 		chess::Board boardState;
 		std::vector<MonteCarloNode*> children;
+		chess::Movelist nonExpandedMoves;
+		int numNonExpandedMoves;
 
 		int numVisits = 1;
 		float score = 0;
@@ -21,9 +25,14 @@ namespace jneoy
 
 		MonteCarloNode(MonteCarloNode* _parent, chess::Board _boardState) : parent(_parent), boardState(_boardState) 
 		{
+			chess::movegen::legalmoves(nonExpandedMoves, boardState);
+			numNonExpandedMoves = nonExpandedMoves.size();
 		}
 
 		MonteCarloNode* GetHighestScoreChild();
 		float GetUCT();
+
+		MonteCarloNode ExpandRandomMove();
+		bool FullyExpanded() { return nonExpandedMoves.size() == 0; }
 	};
 }
