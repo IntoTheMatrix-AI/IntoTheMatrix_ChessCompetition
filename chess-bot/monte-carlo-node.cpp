@@ -38,3 +38,21 @@ float jneoy::MonteCarloNode::GetUCT()
 
 	return firstTerm + secondTerm;
 }
+
+
+MonteCarloNode jneoy::MonteCarloNode::ExpandRandomMove()
+{
+	if (numNonExpandedMoves == 0) throw std::out_of_range("No non-expanded moves!");
+
+	int index = rand() % numNonExpandedMoves;
+	
+	// Make new board with move applied
+	chess::Board newNodeBoard = boardState;
+	newNodeBoard.makeMove(nonExpandedMoves[index]);
+
+	// Send just used move to back of array so we don't pick it again
+	chess::Move temp = nonExpandedMoves[numNonExpandedMoves - 1];
+	nonExpandedMoves[numNonExpandedMoves - 1] = nonExpandedMoves[index];
+	nonExpandedMoves[index] = temp;
+
+}

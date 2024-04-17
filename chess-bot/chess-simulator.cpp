@@ -7,28 +7,48 @@ using namespace ChessSimulator;
 using namespace jneoy;
 
 std::string ChessSimulator::Move(std::string fen) {
-    // create your board based on the board string following the FEN notation
-    // search for the best move using minimax / monte carlo tree search /
-    // alpha-beta pruning / ... try to use nice heuristics to speed up the search
-    // and have better results return the best move in UCI notation you will gain
-    // extra points if you create your own board/move representation instead of
-    // using the one provided by the library
+	// create your board based on the board string following the FEN notation
+	// search for the best move using minimax / monte carlo tree search /
+	// alpha-beta pruning / ... try to use nice heuristics to speed up the search
+	// and have better results return the best move in UCI notation you will gain
+	// extra points if you create your own board/move representation instead of
+	// using the one provided by the library
 
-    //// here goes a random movement
-    //chess::Board board(fen);
-    
+	//// here goes a random movement
+	//chess::Board board(fen);
+	
 
-    srand(time(NULL));
-
-
+	srand(time(NULL));
 
 
 
 
 
-    chess::Board board(fen);
-    MonteCarloNode root = MonteCarloNode(nullptr, board);
 
+
+	chess::Board board(fen);
+	MonteCarloNode root = MonteCarloNode(nullptr, board);
+
+	// FOR LOOP FOR TESTING, CHANGE TO TIME-BASED LATER
+	for (int i = 0; i < 100; i++)
+	{
+		// SELECTION START
+		MonteCarloNode* target = &root;
+		MonteCarloNode* targetHighestUCTChild = target->GetHighestScoreChild();
+
+		while (targetHighestUCTChild != nullptr) // Get highest UCT leaf node
+		{
+			target = targetHighestUCTChild;
+			targetHighestUCTChild = target->GetHighestScoreChild();
+		}
+		// SELECTION END
+
+		// EXPANSION ST
+
+
+		// EXPANSION END
+
+	}
 
 
 
@@ -45,14 +65,14 @@ std::string ChessSimulator::Move(std::string fen) {
     if (moves.size() == 0)
         return "";
 
-    // Get Random Move
-    std::random_device rd;
-    std::mt19937 gen(rd());
-    std::uniform_int_distribution<> dist(0, moves.size() - 1);
-    auto move = moves[dist(gen)];
-    return chess::uci::moveToUci(move);
+	// Get Random Move
+	std::random_device rd;
+	std::mt19937 gen(rd());
+	std::uniform_int_distribution<> dist(0, moves.size() - 1);
+	auto move = moves[dist(gen)];
+	return chess::uci::moveToUci(move);
 
-    return "";
+	return "";
 }
 
 
