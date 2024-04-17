@@ -1,17 +1,17 @@
 #include "monte-carlo-node.h"
 using namespace jneoy;
 
-#define UPDATE_HIGHEST_SCORE_CHILD highestChild = children[i]; highestUCT = possibleUCT;
+#define UPDATE_HIGHEST_SCORE_CHILD highestChild = children.data() + i; highestUCT = possibleUCT;
 MonteCarloNode* MonteCarloNode::GetHighestScoreChild()
 {
 	if (children.size() <= 0) return nullptr;
 
-	MonteCarloNode* highestChild = children[0];
+	MonteCarloNode* highestChild = children.data(); // Gets first element
 	float highestUCT = highestChild->GetUCT();
 
 	for (int i = 1; i < children.size(); ++i)
 	{
-		float possibleUCT = children[i]->GetUCT();
+		float possibleUCT = (children.data() + i)->GetUCT();
 		if (highestUCT < possibleUCT)
 		{
 			UPDATE_HIGHEST_SCORE_CHILD
@@ -55,4 +55,5 @@ MonteCarloNode jneoy::MonteCarloNode::ExpandRandomMove()
 	nonExpandedMoves[numNonExpandedMoves - 1] = nonExpandedMoves[index];
 	nonExpandedMoves[index] = temp;
 
+	children.push_back(MonteCarloNode(this, newNodeBoard));
 }

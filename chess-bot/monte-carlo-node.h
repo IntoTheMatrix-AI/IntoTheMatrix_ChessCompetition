@@ -17,7 +17,7 @@ namespace jneoy
 
 		MonteCarloNode* parent;
 		chess::Board boardState;
-		std::vector<MonteCarloNode*> children;
+		std::vector<MonteCarloNode> children;
 		chess::Movelist nonExpandedMoves;
 		int numNonExpandedMoves;
 
@@ -29,6 +29,7 @@ namespace jneoy
 		{
 			chess::movegen::legalmoves(nonExpandedMoves, boardState);
 			numNonExpandedMoves = nonExpandedMoves.size();
+			children.reserve(numNonExpandedMoves);
 		}
 
 		MonteCarloNode* GetHighestScoreChild();

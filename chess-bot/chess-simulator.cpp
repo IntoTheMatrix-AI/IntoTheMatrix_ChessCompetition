@@ -45,7 +45,6 @@ std::string ChessSimulator::Move(std::string fen) {
 
 		// EXPANSION ST
 
-
 		// EXPANSION END
 
 	}
