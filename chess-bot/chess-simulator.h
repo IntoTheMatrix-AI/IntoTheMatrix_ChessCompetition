@@ -1,5 +1,8 @@
 #pragma once
 #include <string>
+// disservin's lib. drop a star on his hard work!
+// https://github.com/Disservin/chess-library
+#include "chess.hpp"
 
 namespace ChessSimulator {
 /**
@@ -9,4 +12,8 @@ namespace ChessSimulator {
  * @return std::string The move as UCI
  */
 std::string Move(std::string fen);
+
+
+float SimulateRandomGame(chess::Board& board);
+
 } // namespace ChessSimulator

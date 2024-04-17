@@ -1,7 +1,4 @@
 #include "chess-simulator.h"
-// disservin's lib. drop a star on his hard work!
-// https://github.com/Disservin/chess-library
-#include "chess.hpp"
 #include <random>
 using namespace ChessSimulator;
 
@@ -26,4 +23,10 @@ std::string ChessSimulator::Move(std::string fen) {
   std::uniform_int_distribution<> dist(0, moves.size() - 1);
   auto move = moves[dist(gen)];
   return chess::uci::moveToUci(move);
+}
+
+
+float ChessSimulator::SimulateRandomGame(chess::Board& board)
+{
+    return 0.0f;
 }
