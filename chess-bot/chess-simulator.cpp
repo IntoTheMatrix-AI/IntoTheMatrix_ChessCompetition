@@ -36,7 +36,8 @@ std::string ChessSimulator::Move(std::string fen) {
 
 
 
-
+    // Testing SimulateRandomGame()
+    //std::cout << ChessSimulator::SimulateRandomGame(board) << std::endl;
 
     // Random Movement
     chess::Movelist moves;
@@ -69,18 +70,31 @@ float ChessSimulator::SimulateRandomGame(chess::Board board)
     }
 
     // if the current side to move isnt the same one that we started with, then swap sides
-    if (board.sideToMove() != startingSide) {
-        board.makeNullMove();
+    //if (board.sideToMove() != startingSide) {
+    //    board.makeNullMove();
+    //}
+
+    //switch (board.isGameOver().second) {
+    //    case chess::GameResult::WIN:
+    //        return 1.0f;
+    //    case chess::GameResult::LOSE:
+    //        return -1.0f;
+    //    //case chess::GameResult::DRAW:
+    //    //    return 0.0f;
+    //    default:
+    //        return 0.0f;
+    //}
+
+    // if the game isnt a lose, then its a tie
+    if (board.isGameOver().second != chess::GameResult::LOSE) {
+        return 0.0f;
     }
 
-    switch (board.isGameOver().second) {
-        case chess::GameResult::WIN:
-            return 1.0f;
-        case chess::GameResult::LOSE:
-            return -1.0f;
-        case chess::GameResult::DRAW:
-            return 0.0f;
-        default:
-            return 0.0f;
+    // if the loser is the startingSide, then we lose, else then we win
+    if (board.sideToMove() == startingSide) {
+        return -1.0f;
+    }
+    else {
+        return 1.0f;
     }
 }
