@@ -14,6 +14,6 @@ namespace ChessSimulator {
 std::string Move(std::string fen);
 
 
-float SimulateRandomGame(chess::Board& board);
+float SimulateRandomGame(chess::Board board);
 
 } // namespace ChessSimulator

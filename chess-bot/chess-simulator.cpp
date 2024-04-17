@@ -75,7 +75,32 @@ std::string ChessSimulator::Move(std::string fen) {
 }
 
 
-float ChessSimulator::SimulateRandomGame(chess::Board& board)
+float ChessSimulator::SimulateRandomGame(chess::Board board)
 {
-	return 0.0f;
+    // record who's turn it is
+    chess::Color startingSide = board.sideToMove();
+    srand(time(NULL));
+    chess::Movelist movelist;
+
+    // while the game isnt over, make a random legal move
+    while ( board.isGameOver().first == chess::GameResultReason::NONE ) {
+        chess::movegen::legalmoves(movelist, board);
+        board.makeMove( movelist[ rand() % movelist.size() ]);
+    }
+
+    // if the current side to move isnt the same one that we started with, then swap sides
+    if (board.sideToMove() != startingSide) {
+        board.makeNullMove();
+    }
+
+    switch (board.isGameOver().second) {
+        case chess::GameResult::WIN:
+            return 1.0f;
+        case chess::GameResult::LOSE:
+            return -1.0f;
+        case chess::GameResult::DRAW:
+            return 0.0f;
+        default:
+            return 0.0f;
+    }
 }
