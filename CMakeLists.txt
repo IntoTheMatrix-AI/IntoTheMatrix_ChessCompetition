@@ -107,7 +107,7 @@ IF(NOT CHESS_VALIDATOR_ONLY)
                 ${IMGUI_SOURCE_DIR}/backends/imgui_impl_sdlrenderer.cpp
                 ${IMGUI_SOURCE_DIR}/backends/imgui_impl_sdl.cpp
                 ${IMGUI_SOURCE_DIR}/backends/imgui_impl_opengl3.cpp
-        )
+         "chess-bot/monte-carlo-node.h" "chess-bot/monte-carlo-node.cpp")
         target_include_directories( IMGUI
                 PUBLIC ${IMGUI_SOURCE_DIR}
                 PUBLIC ${IMGUI_SOURCE_DIR}/backends
@@ -125,19 +125,19 @@ endif() # NOT CHESS_VALIDATOR_ONLY
 
 # chess library
 file(GLOB_RECURSE CHESS_BOT_FILES CONFIGURE_DEPENDS "chess-bot/*.cpp" "chess-bot/*.h")
-add_library(chessbot STATIC ${CHESS_BOT_FILES})
+add_library(chessbot STATIC ${CHESS_BOT_FILES} "chess-bot/monte-carlo-node.h" "chess-bot/monte-carlo-node.cpp")
 set_target_properties(chessbot PROPERTIES LINKER_LANGUAGE CXX)
 include_directories(chess-bot)
 
 # chess cli
 file(GLOB_RECURSE CHESS_CLI_FILES CONFIGURE_DEPENDS "chess-cli/*.cpp" "chess-cli/*.h")
-add_executable(chesscli ${CHESS_CLI_FILES})
+add_executable(chesscli ${CHESS_CLI_FILES} "chess-bot/monte-carlo-node.h" "chess-bot/monte-carlo-node.cpp")
 target_link_libraries(chesscli PUBLIC chessbot)
 
 if(NOT CHESS_VALIDATOR_ONLY)
 # chess gui
 file(GLOB_RECURSE CHESS_GUI_FILES CONFIGURE_DEPENDS "chess-gui/*.cpp" "chess-gui/*.h")
-add_executable(chessgui ${CHESS_GUI_FILES})
+add_executable(chessgui ${CHESS_GUI_FILES} "chess-bot/monte-carlo-node.h" "chess-bot/monte-carlo-node.cpp")
 target_link_libraries(chessgui PUBLIC chessbot IMGUI SDL2::SDL2 SDL2_image)
 endif() # NOT CHESS_VALIDATOR_ONLY
 
