@@ -91,6 +91,7 @@ MonteCarloNode* jneoy::MonteCarloNode::ExpandRandomMove()
 	return children.data() + children.size() - 1;
 }
 
+
 void jneoy::MonteCarloNode::BackPropagateScore(float scoreToPropagate)
 {
 	score += scoreToPropagate;

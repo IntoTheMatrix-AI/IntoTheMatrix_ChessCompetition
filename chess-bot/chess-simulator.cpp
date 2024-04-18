@@ -106,10 +106,10 @@ int CalculateSideScore(const chess::Board& board, const chess::Color& side)
 	int score = 0;
 
 	score += board.pieces(chess::PieceType::PAWN, side).count();
-	score += board.pieces(chess::PieceType::KNIGHT, side).count();
-	score += board.pieces(chess::PieceType::BISHOP, side).count();
-	score += board.pieces(chess::PieceType::ROOK, side).count();
-	score += board.pieces(chess::PieceType::QUEEN, side).count();
+	score += board.pieces(chess::PieceType::KNIGHT, side).count() * 3;
+	score += board.pieces(chess::PieceType::BISHOP, side).count() * 3;
+	score += board.pieces(chess::PieceType::ROOK, side).count() * 5;
+	score += board.pieces(chess::PieceType::QUEEN, side).count() * 9;
 
 	return score;
 }
@@ -121,18 +121,22 @@ float ChessSimulator::SimulateRandomGame(chess::Board board, chess::Color sideTo
 	//chess::Color startingSide = board.sideToMove();
 	chess::Movelist movelist;
 
-	
+	int ourSideScore = CalculateSideScore(board, sideToScore);
+	int opponentSideScore = CalculateSideScore(board, ~sideToScore);
+	int startScoreDiff = ourSideScore - opponentSideScore;
 
 	int numIterations = 0;
 	// while the game isnt over, make a random legal move
-	while ( board.isGameOver().first == chess::GameResultReason::NONE && numIterations < 1000) {
+	while ( board.isGameOver().first == chess::GameResultReason::NONE && numIterations < 100) {
 		chess::movegen::legalmoves(movelist, board);
 		board.makeMove( movelist[ rand() % movelist.size() ]);
 		++numIterations;
 	}
 
-	int ourSideScore = CalculateSideScore(board, sideToScore);
-	int opponentSideScore = CalculateSideScore(board, ~sideToScore);
+	ourSideScore = CalculateSideScore(board, sideToScore);
+	opponentSideScore = CalculateSideScore(board, ~sideToScore);
+	int endScoreDiff = ourSideScore - opponentSideScore;
+
 	std::string fen = board.getFen();
 
 	// if the current side to move isnt the same one that we started with, then swap sides
@@ -153,14 +157,14 @@ float ChessSimulator::SimulateRandomGame(chess::Board board, chess::Color sideTo
 
 	// if the game isnt a lose, then its a tie
 	if (board.isGameOver().second != chess::GameResult::LOSE) {
-		return 0.0f;
+		return (endScoreDiff - startScoreDiff) / 10.f;
 	}
 
 	// if the loser is the startingSide, then we lose, else then we win
 	if (board.sideToMove() == sideToScore) {
-		return -100.0f;
+		return -1;
 	}
 	else {
-		return 100.0f;
+		return 1;
 	}
 }
