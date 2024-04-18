@@ -8,6 +8,9 @@ int turnCount = 1;
 using namespace ChessSimulator;
 using namespace jneoy;
 
+const float TIME_TO_MOVE_IN_MILLISECONDS = 9500;
+
+
 std::string ChessSimulator::Move(std::string fen) {
 	// create your board based on the board string following the FEN notation
 	// search for the best move using minimax / monte carlo tree search /
@@ -30,9 +33,11 @@ std::string ChessSimulator::Move(std::string fen) {
 
 	chess::Board board(fen);
 	MonteCarloNode root = MonteCarloNode(nullptr, board);
+	std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
+	int numIterations = 0;
+	chess::Color side = board.sideToMove();
 
-	// FOR LOOP FOR TESTING, CHANGE TO TIME-BASED LATER
-	for (int i = 0; i < 300; i++)
+	while(true)
 	{
 		// SELECTION START
 		MonteCarloNode* target = &root;
@@ -49,18 +54,28 @@ std::string ChessSimulator::Move(std::string fen) {
 		MonteCarloNode* expanded = target->ExpandRandomMove();
 		if (expanded == target) // Found what is probably the best choice?
 		{
-			expanded->BackPropagateScore(-10);
+			//break;
+			//expanded->BackPropagateScore(-20);
 		}
 		// EXPANSION END
 
 		// SIMULATION START
-		float result = SimulateRandomGame(expanded->boardState);
+		float result = SimulateRandomGame(expanded->boardState, side);
 		// SIMULATION END
 
 		// BACKPROPAGATION START
 		expanded->BackPropagateScore(result);
 		// BACKPROPAGATION END
+
+		std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
+		auto timePassed = std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count();
+
+		numIterations++;
+
+		if(timePassed > TIME_TO_MOVE_IN_MILLISECONDS) break;
 	}
+
+	//std::cout << "NUM ITERATIONS: " << numIterations << std::endl;
 
 	turnCount += 1;
 	MonteCarloNode* nextMove = root.GetHighestScoreChild();
@@ -86,18 +101,39 @@ std::string ChessSimulator::Move(std::string fen) {
 }
 
 
-float ChessSimulator::SimulateRandomGame(chess::Board board)
+int CalculateSideScore(const chess::Board& board, const chess::Color& side)
+{
+	int score = 0;
+
+	score += board.pieces(chess::PieceType::PAWN, side).count();
+	score += board.pieces(chess::PieceType::KNIGHT, side).count();
+	score += board.pieces(chess::PieceType::BISHOP, side).count();
+	score += board.pieces(chess::PieceType::ROOK, side).count();
+	score += board.pieces(chess::PieceType::QUEEN, side).count();
+
+	return score;
+}
+
+
+float ChessSimulator::SimulateRandomGame(chess::Board board, chess::Color sideToScore)
 {
 	// record who's turn it is
-	chess::Color startingSide = board.sideToMove();
+	//chess::Color startingSide = board.sideToMove();
 	chess::Movelist movelist;
 
+	
 
+	int numIterations = 0;
 	// while the game isnt over, make a random legal move
-	while ( board.isGameOver().first == chess::GameResultReason::NONE ) {
+	while ( board.isGameOver().first == chess::GameResultReason::NONE && numIterations < 1000) {
 		chess::movegen::legalmoves(movelist, board);
 		board.makeMove( movelist[ rand() % movelist.size() ]);
+		++numIterations;
 	}
+
+	int ourSideScore = CalculateSideScore(board, sideToScore);
+	int opponentSideScore = CalculateSideScore(board, ~sideToScore);
+	std::string fen = board.getFen();
 
 	// if the current side to move isnt the same one that we started with, then swap sides
 	//if (board.sideToMove() != startingSide) {
@@ -121,7 +157,7 @@ float ChessSimulator::SimulateRandomGame(chess::Board board)
 	}
 
 	// if the loser is the startingSide, then we lose, else then we win
-	if (board.sideToMove() == startingSide) {
+	if (board.sideToMove() == sideToScore) {
 		return -100.0f;
 	}
 	else {
