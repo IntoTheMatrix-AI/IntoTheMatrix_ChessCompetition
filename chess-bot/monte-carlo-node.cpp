@@ -49,8 +49,8 @@ MonteCarloNode* jneoy::MonteCarloNode::ExpandRandomMove()
 	int index = rand() % numNonExpandedMoves;
 	
 	// Make new board with move applied
-	chess::Board newNodeBoard = boardState;
-	newNodeBoard.makeMove(nonExpandedMoves[index]);
+	/*chess::Board newNodeBoard = boardState;
+	newNodeBoard.makeMove(nonExpandedMoves[index]);*/
 
 	// Send just used move to back of array so we don't pick it again
 	chess::Move temp = nonExpandedMoves[numNonExpandedMoves - 1];
@@ -58,6 +58,14 @@ MonteCarloNode* jneoy::MonteCarloNode::ExpandRandomMove()
 	nonExpandedMoves[index] = temp;
 	numNonExpandedMoves--;
 
-	children.push_back(MonteCarloNode(this, newNodeBoard));
+	children.push_back(MonteCarloNode(this, boardState, nonExpandedMoves[index]));
 	return children.data() + children.size() - 1;
+}
+
+void jneoy::MonteCarloNode::BackPropagateScore(float scoreToPropagate)
+{
+	score += scoreToPropagate;
+	numVisits++;
+
+	if(parent != nullptr) parent->BackPropagateScore(scoreToPropagate);
 }

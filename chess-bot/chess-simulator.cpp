@@ -30,7 +30,7 @@ std::string ChessSimulator::Move(std::string fen) {
 	MonteCarloNode root = MonteCarloNode(nullptr, board);
 
 	// FOR LOOP FOR TESTING, CHANGE TO TIME-BASED LATER
-	for (int i = 0; i < 10000; i++)
+	for (int i = 0; i < 1000; i++)
 	{
 		// SELECTION START
 		MonteCarloNode* target = &root;
@@ -44,25 +44,29 @@ std::string ChessSimulator::Move(std::string fen) {
 		// SELECTION END
 
 		// EXPANSION START
-        MonteCarloNode* expanded = target->ExpandRandomMove();
+		MonteCarloNode* expanded = target->ExpandRandomMove();
 		// EXPANSION END
 
+		// SIMULATION START
+		float result = SimulateRandomGame(expanded->boardState);
+		// SIMULATION END
+
+		// BACKPROPAGATION START
+		expanded->BackPropagateScore(result);
+		// BACKPROPAGATION END
 	}
 
+	MonteCarloNode* nextMove = root.GetHighestScoreChild();
+	return chess::uci::moveToUci(nextMove->move);
 
+	// Testing SimulateRandomGame()
+	//std::cout << ChessSimulator::SimulateRandomGame(board) << std::endl;
 
-
-
-
-
-    // Testing SimulateRandomGame()
-    std::cout << ChessSimulator::SimulateRandomGame(board) << std::endl;
-
-    // Random Movement
-    chess::Movelist moves;
-    chess::movegen::legalmoves(moves, board);
-    if (moves.size() == 0)
-        return "";
+	// Random Movement
+	chess::Movelist moves;
+	chess::movegen::legalmoves(moves, board);
+	if (moves.size() == 0)
+		return "";
 
 	// Get Random Move
 	std::random_device rd;
@@ -77,43 +81,43 @@ std::string ChessSimulator::Move(std::string fen) {
 
 float ChessSimulator::SimulateRandomGame(chess::Board board)
 {
-    // record who's turn it is
-    chess::Color startingSide = board.sideToMove();
-    srand(time(NULL));
-    chess::Movelist movelist;
+	// record who's turn it is
+	chess::Color startingSide = board.sideToMove();
+	srand(time(NULL));
+	chess::Movelist movelist;
 
-    // while the game isnt over, make a random legal move
-    while ( board.isGameOver().first == chess::GameResultReason::NONE ) {
-        chess::movegen::legalmoves(movelist, board);
-        board.makeMove( movelist[ rand() % movelist.size() ]);
-    }
+	// while the game isnt over, make a random legal move
+	while ( board.isGameOver().first == chess::GameResultReason::NONE ) {
+		chess::movegen::legalmoves(movelist, board);
+		board.makeMove( movelist[ rand() % movelist.size() ]);
+	}
 
-    // if the current side to move isnt the same one that we started with, then swap sides
-    //if (board.sideToMove() != startingSide) {
-    //    board.makeNullMove();
-    //}
+	// if the current side to move isnt the same one that we started with, then swap sides
+	//if (board.sideToMove() != startingSide) {
+	//    board.makeNullMove();
+	//}
 
-    //switch (board.isGameOver().second) {
-    //    case chess::GameResult::WIN:
-    //        return 1.0f;
-    //    case chess::GameResult::LOSE:
-    //        return -1.0f;
-    //    //case chess::GameResult::DRAW:
-    //    //    return 0.0f;
-    //    default:
-    //        return 0.0f;
-    //}
+	//switch (board.isGameOver().second) {
+	//    case chess::GameResult::WIN:
+	//        return 1.0f;
+	//    case chess::GameResult::LOSE:
+	//        return -1.0f;
+	//    //case chess::GameResult::DRAW:
+	//    //    return 0.0f;
+	//    default:
+	//        return 0.0f;
+	//}
 
-    // if the game isnt a lose, then its a tie
-    if (board.isGameOver().second != chess::GameResult::LOSE) {
-        return 0.0f;
-    }
+	// if the game isnt a lose, then its a tie
+	if (board.isGameOver().second != chess::GameResult::LOSE) {
+		return 0.0f;
+	}
 
-    // if the loser is the startingSide, then we lose, else then we win
-    if (board.sideToMove() == startingSide) {
-        return -1.0f;
-    }
-    else {
-        return 1.0f;
-    }
+	// if the loser is the startingSide, then we lose, else then we win
+	if (board.sideToMove() == startingSide) {
+		return -1.0f;
+	}
+	else {
+		return 1.0f;
+	}
 }

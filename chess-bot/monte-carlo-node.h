@@ -20,6 +20,7 @@ namespace jneoy
 		std::vector<MonteCarloNode> children;
 		chess::Movelist nonExpandedMoves;
 		int numNonExpandedMoves;
+		chess::Move move;
 
 		int numVisits = 1;
 		float score = 0;
@@ -27,8 +28,11 @@ namespace jneoy
 		std::string fen;
 
 
-		MonteCarloNode(MonteCarloNode* _parent, chess::Board _boardState) : parent(_parent), boardState(_boardState) 
+		MonteCarloNode(MonteCarloNode* _parent, chess::Board _boardState, chess::Move _move = chess::Move()) : parent(_parent), boardState(_boardState), move(_move)
 		{
+			if(move != chess::Move())
+				boardState.makeMove(move);
+
 			chess::movegen::legalmoves(nonExpandedMoves, boardState);
 			numNonExpandedMoves = nonExpandedMoves.size();
 			children.reserve(numNonExpandedMoves);
@@ -41,5 +45,7 @@ namespace jneoy
 
 		MonteCarloNode* ExpandRandomMove();
 		bool FullyExpanded() { return numNonExpandedMoves == 0; }
+
+		void BackPropagateScore(float scoreToPropagate);
 	};
 }
