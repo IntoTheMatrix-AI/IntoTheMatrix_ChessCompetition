@@ -30,21 +30,21 @@ std::string ChessSimulator::Move(std::string fen) {
 	MonteCarloNode root = MonteCarloNode(nullptr, board);
 
 	// FOR LOOP FOR TESTING, CHANGE TO TIME-BASED LATER
-	for (int i = 0; i < 100; i++)
+	for (int i = 0; i < 10000; i++)
 	{
 		// SELECTION START
 		MonteCarloNode* target = &root;
 		MonteCarloNode* targetHighestUCTChild = target->GetHighestScoreChild();
 
-		while (targetHighestUCTChild != nullptr) // Get highest UCT leaf node
+		while (targetHighestUCTChild != nullptr && target->FullyExpanded()) // Get highest UCT leaf node
 		{
 			target = targetHighestUCTChild;
 			targetHighestUCTChild = target->GetHighestScoreChild();
 		}
 		// SELECTION END
 
-		// EXPANSION ST
-
+		// EXPANSION START
+        MonteCarloNode* expanded = target->ExpandRandomMove();
 		// EXPANSION END
 
 	}
@@ -56,7 +56,7 @@ std::string ChessSimulator::Move(std::string fen) {
 
 
     // Testing SimulateRandomGame()
-    //std::cout << ChessSimulator::SimulateRandomGame(board) << std::endl;
+    std::cout << ChessSimulator::SimulateRandomGame(board) << std::endl;
 
     // Random Movement
     chess::Movelist moves;

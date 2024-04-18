@@ -24,18 +24,22 @@ namespace jneoy
 		int numVisits = 1;
 		float score = 0;
 
+		std::string fen;
+
 
 		MonteCarloNode(MonteCarloNode* _parent, chess::Board _boardState) : parent(_parent), boardState(_boardState) 
 		{
 			chess::movegen::legalmoves(nonExpandedMoves, boardState);
 			numNonExpandedMoves = nonExpandedMoves.size();
 			children.reserve(numNonExpandedMoves);
+
+			fen = boardState.getFen();
 		}
 
 		MonteCarloNode* GetHighestScoreChild();
 		float GetUCT();
 
-		MonteCarloNode ExpandRandomMove();
-		bool FullyExpanded() { return nonExpandedMoves.size() == 0; }
+		MonteCarloNode* ExpandRandomMove();
+		bool FullyExpanded() { return numNonExpandedMoves == 0; }
 	};
 }
