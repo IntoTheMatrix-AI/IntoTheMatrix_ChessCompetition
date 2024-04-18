@@ -30,7 +30,7 @@ std::string ChessSimulator::Move(std::string fen) {
 	MonteCarloNode root = MonteCarloNode(nullptr, board);
 
 	// FOR LOOP FOR TESTING, CHANGE TO TIME-BASED LATER
-	for (int i = 0; i < 1000; i++)
+	for (int i = 0; i < 10000; i++)
 	{
 		// SELECTION START
 		MonteCarloNode* target = &root;
@@ -63,19 +63,19 @@ std::string ChessSimulator::Move(std::string fen) {
 	//std::cout << ChessSimulator::SimulateRandomGame(board) << std::endl;
 
 	// Random Movement
-	chess::Movelist moves;
-	chess::movegen::legalmoves(moves, board);
-	if (moves.size() == 0)
-		return "";
+	//chess::Movelist moves;
+	//chess::movegen::legalmoves(moves, board);
+	//if (moves.size() == 0)
+	//	return "";
 
-	// Get Random Move
-	std::random_device rd;
-	std::mt19937 gen(rd());
-	std::uniform_int_distribution<> dist(0, moves.size() - 1);
-	auto move = moves[dist(gen)];
-	return chess::uci::moveToUci(move);
+	//// Get Random Move
+	//std::random_device rd;
+	//std::mt19937 gen(rd());
+	//std::uniform_int_distribution<> dist(0, moves.size() - 1);
+	//auto move = moves[dist(gen)];
+	//return chess::uci::moveToUci(move);
 
-	return "";
+	//return "";
 }
 
 
@@ -83,7 +83,6 @@ float ChessSimulator::SimulateRandomGame(chess::Board board)
 {
 	// record who's turn it is
 	chess::Color startingSide = board.sideToMove();
-	srand(time(NULL));
 	chess::Movelist movelist;
 
 	// while the game isnt over, make a random legal move

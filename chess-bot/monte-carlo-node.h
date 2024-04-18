@@ -8,7 +8,7 @@ namespace jneoy
 {
 	// TODO: 
 	// Handle edge case of no valid children to expand with this node
-	// Handle side switching for legal moves
+	// Optimization of keeping branch we already started exploring
 
 	struct MonteCarloNode
 	{
