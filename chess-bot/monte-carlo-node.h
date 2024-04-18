@@ -40,8 +40,10 @@ namespace jneoy
 			fen = boardState.getFen();
 		}
 
-		MonteCarloNode* GetHighestScoreChild();
+		MonteCarloNode* GetHighestUCTChild();
 		float GetUCT();
+
+		MonteCarloNode* GetHighestScoreChild();
 
 		MonteCarloNode* ExpandRandomMove();
 		bool FullyExpanded() { return numNonExpandedMoves == 0; }

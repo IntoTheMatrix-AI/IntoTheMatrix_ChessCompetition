@@ -3,6 +3,8 @@
 #include "monte-carlo-node.h"
 #include <chrono> // Needed for when we start limiting monte carlo by time
 
+int turnCount = 1;
+
 using namespace ChessSimulator;
 using namespace jneoy;
 
@@ -30,21 +32,25 @@ std::string ChessSimulator::Move(std::string fen) {
 	MonteCarloNode root = MonteCarloNode(nullptr, board);
 
 	// FOR LOOP FOR TESTING, CHANGE TO TIME-BASED LATER
-	for (int i = 0; i < 10000; i++)
+	for (int i = 0; i < 300; i++)
 	{
 		// SELECTION START
 		MonteCarloNode* target = &root;
-		MonteCarloNode* targetHighestUCTChild = target->GetHighestScoreChild();
+		MonteCarloNode* targetHighestUCTChild = target->GetHighestUCTChild();
 
 		while (targetHighestUCTChild != nullptr && target->FullyExpanded()) // Get highest UCT leaf node
 		{
 			target = targetHighestUCTChild;
-			targetHighestUCTChild = target->GetHighestScoreChild();
+			targetHighestUCTChild = target->GetHighestUCTChild();
 		}
 		// SELECTION END
 
 		// EXPANSION START
 		MonteCarloNode* expanded = target->ExpandRandomMove();
+		if (expanded == target) // Found what is probably the best choice?
+		{
+			expanded->BackPropagateScore(-10);
+		}
 		// EXPANSION END
 
 		// SIMULATION START
@@ -56,6 +62,7 @@ std::string ChessSimulator::Move(std::string fen) {
 		// BACKPROPAGATION END
 	}
 
+	turnCount += 1;
 	MonteCarloNode* nextMove = root.GetHighestScoreChild();
 	return chess::uci::moveToUci(nextMove->move);
 
@@ -84,6 +91,7 @@ float ChessSimulator::SimulateRandomGame(chess::Board board)
 	// record who's turn it is
 	chess::Color startingSide = board.sideToMove();
 	chess::Movelist movelist;
+
 
 	// while the game isnt over, make a random legal move
 	while ( board.isGameOver().first == chess::GameResultReason::NONE ) {
@@ -114,9 +122,9 @@ float ChessSimulator::SimulateRandomGame(chess::Board board)
 
 	// if the loser is the startingSide, then we lose, else then we win
 	if (board.sideToMove() == startingSide) {
-		return -1.0f;
+		return -100.0f;
 	}
 	else {
-		return 1.0f;
+		return 100.0f;
 	}
 }

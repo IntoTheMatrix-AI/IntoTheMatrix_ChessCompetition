@@ -2,7 +2,7 @@
 using namespace jneoy;
 
 
-MonteCarloNode* MonteCarloNode::GetHighestScoreChild()
+MonteCarloNode* MonteCarloNode::GetHighestUCTChild()
 {
 	if (children.size() <= 0) return nullptr;
 
@@ -42,9 +42,38 @@ float jneoy::MonteCarloNode::GetUCT()
 }
 
 
+MonteCarloNode* jneoy::MonteCarloNode::GetHighestScoreChild()
+{
+	if (children.size() <= 0) return nullptr;
+
+	std::vector<MonteCarloNode*> highestChildren;
+	highestChildren.reserve(children.size());
+
+	highestChildren.push_back(children.data()); // Gets first element
+	float highestScore = highestChildren[0]->score;
+
+	for (int i = 1; i < children.size(); ++i)
+	{
+		float possibleUCT = (children.data() + i)->score;
+		if (highestScore < possibleUCT)
+		{
+			highestChildren.clear();
+			highestChildren.push_back(children.data() + i);
+			highestScore = possibleUCT;
+		}
+		else if (std::abs(highestScore - possibleUCT) < SAME_THRESHOLD) // Handle case where highest children are roughly equal
+		{
+			highestChildren.push_back(children.data() + i);
+		}
+	}
+
+	return highestChildren[rand() % highestChildren.size()];
+}
+
+
 MonteCarloNode* jneoy::MonteCarloNode::ExpandRandomMove()
 {
-	if (numNonExpandedMoves == 0) throw std::out_of_range("No non-expanded moves!");
+	if (numNonExpandedMoves == 0) return this; /*throw std::out_of_range("No non-expanded moves!")*/
 
 	int index = rand() % numNonExpandedMoves;
 	
