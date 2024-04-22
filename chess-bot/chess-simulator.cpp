@@ -2,6 +2,10 @@
 #include <random>
 #include "monte-carlo-node.h"
 #include <chrono> // Needed for when we start limiting monte carlo by time
+#include <thread>
+#include <mutex>
+#include <atomic>
+
 
 int turnCount = 1;
 
@@ -52,11 +56,11 @@ std::string ChessSimulator::Move(std::string fen) {
 
 		// EXPANSION START
 		MonteCarloNode* expanded = target->ExpandRandomMove();
-		if (expanded == target) // Found what is probably the best choice?
-		{
-			//break;
-			//expanded->BackPropagateScore(-20);
-		}
+		//if (expanded == target) // Found what is probably the best choice?
+		//{
+		//	//break;
+		//	//expanded->BackPropagateScore(-20);
+		//}
 		// EXPANSION END
 
 		// SIMULATION START

@@ -2,6 +2,8 @@
 #include "chess.hpp"
 #include <vector>
 #include "random"
+#include <atomic>
+#include <mutex>
 
 
 namespace jneoy
@@ -14,6 +16,11 @@ namespace jneoy
 	{
 		const float C = sqrtf(2);
 		const float SAME_THRESHOLD = .01;
+
+		std::atomic<bool> locked = false;
+		std::atomic<int> numChildrenLocked = 0;
+
+		std::mutex mutexLock;
 
 		MonteCarloNode* parent;
 		chess::Board boardState;
@@ -49,5 +56,8 @@ namespace jneoy
 		bool FullyExpanded() { return numNonExpandedMoves == 0; }
 
 		void BackPropagateScore(float scoreToPropagate);
+
+		void BackPropagateLock();
+		void BackPropagateUnlock();
 	};
 }
