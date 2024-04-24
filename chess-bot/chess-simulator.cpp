@@ -15,36 +15,19 @@ using namespace jneoy;
 const float TIME_TO_MOVE_IN_MILLISECONDS = 9500;
 
 
-std::string ChessSimulator::Move(std::string fen) {
-	// create your board based on the board string following the FEN notation
-	// search for the best move using minimax / monte carlo tree search /
-	// alpha-beta pruning / ... try to use nice heuristics to speed up the search
-	// and have better results return the best move in UCI notation you will gain
-	// extra points if you create your own board/move representation instead of
-	// using the one provided by the library
-
-	//// here goes a random movement
-	//chess::Board board(fen);
-	
-
-	srand(time(NULL));
+//void DoMonteCarlo(MonteCarloNode& root, chess::Board& board);
 
 
-
-
-
-
-
-	chess::Board board(fen);
-	MonteCarloNode root = MonteCarloNode(nullptr, board);
+void DoMonteCarlo(MonteCarloNode* root, chess::Board* board)
+{
 	std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
 	int numIterations = 0;
-	chess::Color side = board.sideToMove();
+	chess::Color side = board->sideToMove();
 
-	while(true)
+	while (true)
 	{
 		// SELECTION START
-		MonteCarloNode* target = &root;
+		MonteCarloNode* target = root;
 		MonteCarloNode* targetHighestUCTChild = target->GetHighestUCTChild();
 
 		while (targetHighestUCTChild != nullptr && target->FullyExpanded()) // Get highest UCT leaf node
@@ -76,8 +59,43 @@ std::string ChessSimulator::Move(std::string fen) {
 
 		numIterations++;
 
-		if(timePassed > TIME_TO_MOVE_IN_MILLISECONDS) break;
+		if (timePassed > TIME_TO_MOVE_IN_MILLISECONDS) break;
 	}
+}
+
+
+std::string ChessSimulator::Move(std::string fen) {
+	// create your board based on the board string following the FEN notation
+	// search for the best move using minimax / monte carlo tree search /
+	// alpha-beta pruning / ... try to use nice heuristics to speed up the search
+	// and have better results return the best move in UCI notation you will gain
+	// extra points if you create your own board/move representation instead of
+	// using the one provided by the library
+
+	//// here goes a random movement
+	//chess::Board board(fen);
+	
+
+	srand(time(NULL));
+	chess::Board board(fen);
+	MonteCarloNode root = MonteCarloNode(nullptr, board);
+	
+	std::thread thread0(DoMonteCarlo, &root, &board);
+	std::thread thread1(DoMonteCarlo, &root, &board);
+	std::thread thread2(DoMonteCarlo, &root, &board);
+	std::thread thread3(DoMonteCarlo, &root, &board);
+	
+	//thread0.
+	//thread0.join();
+
+	thread0.join();
+	thread1.join();
+	thread2.join();
+	thread3.join();
+
+
+	//DoMonteCarlo(root, board);
+
 
 	//std::cout << "NUM ITERATIONS: " << numIterations << std::endl;
 
@@ -110,10 +128,10 @@ int CalculateSideScore(const chess::Board& board, const chess::Color& side)
 	int score = 0;
 
 	score += board.pieces(chess::PieceType::PAWN, side).count();
-	score += board.pieces(chess::PieceType::KNIGHT, side).count() * 3;
-	score += board.pieces(chess::PieceType::BISHOP, side).count() * 3;
-	score += board.pieces(chess::PieceType::ROOK, side).count() * 5;
-	score += board.pieces(chess::PieceType::QUEEN, side).count() * 9;
+	score += board.pieces(chess::PieceType::KNIGHT, side).count() * 200;
+	score += board.pieces(chess::PieceType::BISHOP, side).count() * 300;
+	score += board.pieces(chess::PieceType::ROOK, side).count() * 1000;
+	score += board.pieces(chess::PieceType::QUEEN, side).count() * 10000;
 
 	return score;
 }
@@ -131,7 +149,7 @@ float ChessSimulator::SimulateRandomGame(chess::Board board, chess::Color sideTo
 
 	int numIterations = 0;
 	// while the game isnt over, make a random legal move
-	while ( board.isGameOver().first == chess::GameResultReason::NONE && numIterations < 100) {
+	while ( board.isGameOver().first == chess::GameResultReason::NONE && numIterations < 20) {
 		chess::movegen::legalmoves(movelist, board);
 		board.makeMove( movelist[ rand() % movelist.size() ]);
 		++numIterations;
@@ -161,14 +179,14 @@ float ChessSimulator::SimulateRandomGame(chess::Board board, chess::Color sideTo
 
 	// if the game isnt a lose, then its a tie
 	if (board.isGameOver().second != chess::GameResult::LOSE) {
-		return (endScoreDiff - startScoreDiff) / 10.f;
+		return (endScoreDiff - startScoreDiff);
 	}
 
 	// if the loser is the startingSide, then we lose, else then we win
 	if (board.sideToMove() == sideToScore) {
-		return -1;
+		return -10;
 	}
 	else {
-		return 1;
+		return 10;
 	}
 }

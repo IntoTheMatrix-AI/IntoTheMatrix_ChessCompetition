@@ -15,18 +15,19 @@ MonteCarloNode* MonteCarloNode::GetHighestUCTChild()
 
 	for (int i = 0; i < children.size(); ++i)
 	{
-		float possibleUCT = (children.data() + i)->GetUCT();
-		if ((children.data() + i)->locked) continue;
+		if (children[i]->locked) continue;
+
+		float possibleUCT = children[i]->GetUCT();
 
 		if (highestUCT < possibleUCT)
 		{
 			highestChildren.clear();
-			highestChildren.push_back(children.data() + i); 
+			highestChildren.push_back(children[i]);
 			highestUCT = possibleUCT;
 		}
 		else if (std::abs(highestUCT - possibleUCT) < SAME_THRESHOLD) // Handle case where highest children are roughly equal
 		{
-			highestChildren.push_back(children.data() + i);
+			highestChildren.push_back(children[i]);
 		}
 	}
 
@@ -54,21 +55,21 @@ MonteCarloNode* jneoy::MonteCarloNode::GetHighestScoreChild()
 	std::vector<MonteCarloNode*> highestChildren;
 	highestChildren.reserve(children.size());
 
-	highestChildren.push_back(children.data()); // Gets first element
+	highestChildren.push_back(*children.data()); // Gets first element
 	float highestScore = highestChildren[0]->score;
 
 	for (int i = 1; i < children.size(); ++i)
 	{
-		float possibleUCT = (children.data() + i)->score;
+		float possibleUCT = children[i]->score;
 		if (highestScore < possibleUCT)
 		{
 			highestChildren.clear();
-			highestChildren.push_back(children.data() + i);
+			highestChildren.push_back(children[i]);
 			highestScore = possibleUCT;
 		}
 		else if (std::abs(highestScore - possibleUCT) < SAME_THRESHOLD) // Handle case where highest children are roughly equal
 		{
-			highestChildren.push_back(children.data() + i);
+			highestChildren.push_back(children[i]);
 		}
 	}
 
@@ -78,7 +79,9 @@ MonteCarloNode* jneoy::MonteCarloNode::GetHighestScoreChild()
 
 MonteCarloNode* jneoy::MonteCarloNode::ExpandRandomMove()
 {
-	if (numNonExpandedMoves == 0) return this; /*throw std::out_of_range("No non-expanded moves!")*/
+
+	mutexLock.lock();
+	if (numNonExpandedMoves == 0) { mutexLock.unlock(); return this; } /*throw std::out_of_range("No non-expanded moves!")*/
 
 	int index = rand() % numNonExpandedMoves;
 	
@@ -92,8 +95,10 @@ MonteCarloNode* jneoy::MonteCarloNode::ExpandRandomMove()
 	nonExpandedMoves[index] = temp;
 	numNonExpandedMoves--;
 
-	children.push_back(MonteCarloNode(this, boardState, nonExpandedMoves[index]));
-	return children.data() + children.size() - 1;
+	children.push_back(new MonteCarloNode(this, boardState, nonExpandedMoves[index]));
+
+	mutexLock.unlock();
+	return children.back();
 }
 
 

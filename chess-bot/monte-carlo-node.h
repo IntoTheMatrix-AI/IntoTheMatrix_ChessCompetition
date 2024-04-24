@@ -24,7 +24,7 @@ namespace jneoy
 
 		MonteCarloNode* parent;
 		chess::Board boardState;
-		std::vector<MonteCarloNode> children;
+		std::vector<MonteCarloNode*> children;
 		chess::Movelist nonExpandedMoves;
 		int numNonExpandedMoves;
 		chess::Move move;
@@ -46,6 +46,21 @@ namespace jneoy
 
 			fen = boardState.getFen();
 		}
+
+		~MonteCarloNode()
+		{
+			for (int i = 0; i < children.size(); ++i)
+			{
+				delete children[i];
+			}
+
+			children.clear();
+		}
+
+		MonteCarloNode(const MonteCarloNode& other) = delete;
+
+
+
 
 		MonteCarloNode* GetHighestUCTChild();
 		float GetUCT();
