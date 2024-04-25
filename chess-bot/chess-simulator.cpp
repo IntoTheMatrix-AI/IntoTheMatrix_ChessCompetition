@@ -12,7 +12,7 @@ int turnCount = 1;
 using namespace ChessSimulator;
 using namespace jneoy;
 
-const float TIME_TO_MOVE_IN_MILLISECONDS = 9500;
+const float TIME_TO_MOVE_IN_MILLISECONDS = 500;
 
 
 //void DoMonteCarlo(MonteCarloNode& root, chess::Board& board);
@@ -47,7 +47,7 @@ void DoMonteCarlo(MonteCarloNode* root, chess::Board* board)
 		// EXPANSION END
 
 		// SIMULATION START
-		float result = SimulateRandomGame(expanded->boardState, side);
+		float result = SimulateRandomGame(expanded->boardState, expanded->boardState, side);
 		// SIMULATION END
 
 		// BACKPROPAGATION START
@@ -93,6 +93,8 @@ std::string ChessSimulator::Move(std::string fen) {
 	thread2.join();
 	thread3.join();
 
+	//std::cout << "NUM CHILDREN ANY LEVEL: " << root.numChildrenAnyLevel << std::endl;
+
 
 	//DoMonteCarlo(root, board);
 
@@ -128,20 +130,22 @@ int CalculateSideScore(const chess::Board& board, const chess::Color& side)
 	int score = 0;
 
 	score += board.pieces(chess::PieceType::PAWN, side).count();
-	score += board.pieces(chess::PieceType::KNIGHT, side).count() * 200;
-	score += board.pieces(chess::PieceType::BISHOP, side).count() * 300;
-	score += board.pieces(chess::PieceType::ROOK, side).count() * 1000;
-	score += board.pieces(chess::PieceType::QUEEN, side).count() * 10000;
+	score += board.pieces(chess::PieceType::KNIGHT, side).count() * 2;
+	score += board.pieces(chess::PieceType::BISHOP, side).count() * 3;
+	score += board.pieces(chess::PieceType::ROOK, side).count() * 5;
+	score += board.pieces(chess::PieceType::QUEEN, side).count() * 9;
 
 	return score;
 }
 
 
-float ChessSimulator::SimulateRandomGame(chess::Board board, chess::Color sideToScore)
+float ChessSimulator::SimulateRandomGame(const chess::Board& prevBoard, chess::Board board, chess::Color sideToScore)
 {
 	// record who's turn it is
 	//chess::Color startingSide = board.sideToMove();
 	chess::Movelist movelist;
+
+	int score = 0;
 
 	int ourSideScore = CalculateSideScore(board, sideToScore);
 	int opponentSideScore = CalculateSideScore(board, ~sideToScore);
@@ -149,7 +153,7 @@ float ChessSimulator::SimulateRandomGame(chess::Board board, chess::Color sideTo
 
 	int numIterations = 0;
 	// while the game isnt over, make a random legal move
-	while ( board.isGameOver().first == chess::GameResultReason::NONE && numIterations < 20) {
+	while ( board.isGameOver().first == chess::GameResultReason::NONE && numIterations < 100) {
 		chess::movegen::legalmoves(movelist, board);
 		board.makeMove( movelist[ rand() % movelist.size() ]);
 		++numIterations;

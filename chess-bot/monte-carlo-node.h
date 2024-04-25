@@ -17,11 +17,6 @@ namespace jneoy
 		const float C = sqrtf(2);
 		const float SAME_THRESHOLD = .01;
 
-		std::atomic<bool> locked = false;
-		std::atomic<int> numChildrenLocked = 0;
-
-		std::mutex mutexLock;
-
 		MonteCarloNode* parent;
 		chess::Board boardState;
 		std::vector<MonteCarloNode*> children;
@@ -30,6 +25,7 @@ namespace jneoy
 		chess::Move move;
 
 		int numVisits = 1;
+		int numChildrenAnyLevel = 0;
 		float score = 0;
 
 		std::string fen;
@@ -59,8 +55,7 @@ namespace jneoy
 
 		MonteCarloNode(const MonteCarloNode& other) = delete;
 
-
-
+		void FullyExpandChildren();
 
 		MonteCarloNode* GetHighestUCTChild();
 		float GetUCT();
@@ -74,5 +69,7 @@ namespace jneoy
 
 		void BackPropagateLock();
 		void BackPropagateUnlock();
+
+		void BackPropagateNewChildIncrement();
 	};
 }

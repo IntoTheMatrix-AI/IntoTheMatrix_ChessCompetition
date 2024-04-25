@@ -4,6 +4,12 @@
 using namespace jneoy;
 
 
+void jneoy::MonteCarloNode::FullyExpandChildren()
+{
+	while(ExpandRandomMove() != this) {}
+}
+
+
 MonteCarloNode* MonteCarloNode::GetHighestUCTChild()
 {
 	if (children.size() <= 0) return nullptr;
@@ -15,11 +21,6 @@ MonteCarloNode* MonteCarloNode::GetHighestUCTChild()
 
 	for (int i = 0; i < children.size(); ++i)
 	{
-		children[i]->mutexLock.lock();
-		if (children[i]->locked) {
-			mutexLock.unlock();  continue;
-		}
-
 		float possibleUCT = children[i]->GetUCT();
 
 		if (highestUCT < possibleUCT)
@@ -32,7 +33,6 @@ MonteCarloNode* MonteCarloNode::GetHighestUCTChild()
 		{
 			highestChildren.push_back(children[i]);
 		}
-		children[i]->mutexLock.unlock();
 	}
 
 	if (highestChildren.size() <= 0) return nullptr;
@@ -83,9 +83,7 @@ MonteCarloNode* jneoy::MonteCarloNode::GetHighestScoreChild()
 
 MonteCarloNode* jneoy::MonteCarloNode::ExpandRandomMove()
 {
-
-	mutexLock.lock();
-	if (numNonExpandedMoves == 0) { mutexLock.unlock(); return this; } /*throw std::out_of_range("No non-expanded moves!")*/
+	if (numNonExpandedMoves == 0) { return this; } /*throw std::out_of_range("No non-expanded moves!")*/
 
 	int index = rand() % numNonExpandedMoves;
 	
@@ -101,7 +99,8 @@ MonteCarloNode* jneoy::MonteCarloNode::ExpandRandomMove()
 
 	children.push_back(new MonteCarloNode(this, boardState, nonExpandedMoves[index]));
 
-	mutexLock.unlock();
+	BackPropagateNewChildIncrement();
+
 	return children.back();
 }
 
@@ -117,13 +116,8 @@ void jneoy::MonteCarloNode::BackPropagateScore(float scoreToPropagate)
 
 void jneoy::MonteCarloNode::BackPropagateLock()
 {
-	mutexLock.lock();
-	locked = true;
-
 	if (parent != nullptr)
 	{
-		parent->numChildrenLocked++;
-		
 		if (parent->children.size() + parent->nonExpandedMoves.size() <= parent->numChildrenLocked)
 		{
 			parent->BackPropagateLock();
@@ -147,4 +141,12 @@ void jneoy::MonteCarloNode::BackPropagateUnlock()
 	}
 
 	mutexLock.unlock();
+}
+
+
+void jneoy::MonteCarloNode::BackPropagateNewChildIncrement()
+{
+	numChildrenAnyLevel++;
+
+	if(parent != nullptr) parent->BackPropagateNewChildIncrement();
 }
