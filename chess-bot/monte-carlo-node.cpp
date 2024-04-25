@@ -15,7 +15,10 @@ MonteCarloNode* MonteCarloNode::GetHighestUCTChild()
 
 	for (int i = 0; i < children.size(); ++i)
 	{
-		if (children[i]->locked) continue;
+		children[i]->mutexLock.lock();
+		if (children[i]->locked) {
+			mutexLock.unlock();  continue;
+		}
 
 		float possibleUCT = children[i]->GetUCT();
 
@@ -29,6 +32,7 @@ MonteCarloNode* MonteCarloNode::GetHighestUCTChild()
 		{
 			highestChildren.push_back(children[i]);
 		}
+		children[i]->mutexLock.unlock();
 	}
 
 	if (highestChildren.size() <= 0) return nullptr;
