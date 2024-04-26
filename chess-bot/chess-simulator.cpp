@@ -5,6 +5,7 @@
 #include <thread>
 #include <mutex>
 #include <atomic>
+#include "monte-carlo-root-node.h"
 
 
 int turnCount = 1;
@@ -18,7 +19,7 @@ const float TIME_TO_MOVE_IN_MILLISECONDS = 500;
 //void DoMonteCarlo(MonteCarloNode& root, chess::Board& board);
 
 
-void DoMonteCarlo(MonteCarloNode* root, chess::Board* board)
+void DoMonteCarlo(MonteCarloNode* root, chess::Board* board, int beginIndex, int count)
 {
 	std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
 	int numIterations = 0;
@@ -28,7 +29,7 @@ void DoMonteCarlo(MonteCarloNode* root, chess::Board* board)
 	{
 		// SELECTION START
 		MonteCarloNode* target = root;
-		MonteCarloNode* targetHighestUCTChild = target->GetHighestUCTChild();
+		MonteCarloNode* targetHighestUCTChild = target->GetHighestUCTChild(beginIndex, count);
 
 		while (targetHighestUCTChild != nullptr && target->FullyExpanded()) // Get highest UCT leaf node
 		{
@@ -78,20 +79,40 @@ std::string ChessSimulator::Move(std::string fen) {
 
 	srand(time(NULL));
 	chess::Board board(fen);
-	MonteCarloNode root = MonteCarloNode(nullptr, board);
+	MonteCarloRootNode root = MonteCarloRootNode(board);
+
+	root.FullyExpandChildren();
 	
-	std::thread thread0(DoMonteCarlo, &root, &board);
+	const int NUM_THREADS = 4;
+	std::thread threads[NUM_THREADS];
+	int numBranches = root.children.size() / NUM_THREADS;
+
+	for (int i = 0; i < NUM_THREADS - 1; i++)
+	{
+		threads[i] = std::thread(DoMonteCarlo, &root, &board, numBranches * i, numBranches);
+	}
+
+	int startIndex = numBranches * (NUM_THREADS - 1);
+	threads[NUM_THREADS - 1] = std::thread(DoMonteCarlo, &root, &board, startIndex, 
+		root.children.size() - startIndex);
+
+	for (int i = 0; i < NUM_THREADS; i++)
+	{
+		threads[i].join();
+	}
+
+	/*std::thread thread0(DoMonteCarlo, &root, &board);
 	std::thread thread1(DoMonteCarlo, &root, &board);
 	std::thread thread2(DoMonteCarlo, &root, &board);
-	std::thread thread3(DoMonteCarlo, &root, &board);
+	std::thread thread3(DoMonteCarlo, &root, &board);*/
 	
 	//thread0.
 	//thread0.join();
 
-	thread0.join();
+	/*thread0.join();
 	thread1.join();
 	thread2.join();
-	thread3.join();
+	thread3.join();*/
 
 	//std::cout << "NUM CHILDREN ANY LEVEL: " << root.numChildrenAnyLevel << std::endl;
 

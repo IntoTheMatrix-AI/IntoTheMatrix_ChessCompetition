@@ -12,6 +12,12 @@ void jneoy::MonteCarloNode::FullyExpandChildren()
 
 MonteCarloNode* MonteCarloNode::GetHighestUCTChild()
 {
+	return GetHighestUCTChild(0, children.size());
+}
+
+
+MonteCarloNode* MonteCarloNode::GetHighestUCTChild(int beginIndex, int count)
+{
 	if (children.size() <= 0) return nullptr;
 
 	std::vector<MonteCarloNode*> highestChildren;
@@ -19,7 +25,7 @@ MonteCarloNode* MonteCarloNode::GetHighestUCTChild()
 
 	float highestUCT = -INT_MAX;
 
-	for (int i = 0; i < children.size(); ++i)
+	for (int i = beginIndex; i < beginIndex + count; ++i)
 	{
 		float possibleUCT = children[i]->GetUCT();
 
@@ -111,36 +117,6 @@ void jneoy::MonteCarloNode::BackPropagateScore(float scoreToPropagate)
 	numVisits++;
 
 	if(parent != nullptr) parent->BackPropagateScore(scoreToPropagate);
-}
-
-
-void jneoy::MonteCarloNode::BackPropagateLock()
-{
-	if (parent != nullptr)
-	{
-		if (parent->children.size() + parent->nonExpandedMoves.size() <= parent->numChildrenLocked)
-		{
-			parent->BackPropagateLock();
-		}
-	}
-
-	mutexLock.unlock();
-}
-
-
-void jneoy::MonteCarloNode::BackPropagateUnlock()
-{
-	mutexLock.lock();
-	locked = false;
-
-	if (parent != nullptr)
-	{
-		parent->numChildrenLocked--;
-
-		if (parent->locked) parent->BackPropagateUnlock();
-	}
-
-	mutexLock.unlock();
 }
 
 

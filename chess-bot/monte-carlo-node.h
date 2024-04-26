@@ -58,6 +58,7 @@ namespace jneoy
 		void FullyExpandChildren();
 
 		MonteCarloNode* GetHighestUCTChild();
+		MonteCarloNode* GetHighestUCTChild(int beginIndex, int count);
 		float GetUCT();
 
 		MonteCarloNode* GetHighestScoreChild();
@@ -65,10 +66,7 @@ namespace jneoy
 		MonteCarloNode* ExpandRandomMove();
 		bool FullyExpanded() { return numNonExpandedMoves == 0; }
 
-		void BackPropagateScore(float scoreToPropagate);
-
-		void BackPropagateLock();
-		void BackPropagateUnlock();
+		virtual void BackPropagateScore(float scoreToPropagate);
 
 		void BackPropagateNewChildIncrement();
 	};
