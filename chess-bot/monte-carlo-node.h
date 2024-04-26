@@ -14,7 +14,7 @@ namespace jneoy
 
 	struct MonteCarloNode
 	{
-		const float C = sqrtf(2);
+		const float C = sqrtf(1000);
 		const float SAME_THRESHOLD = .01;
 
 		MonteCarloNode* parent;
@@ -55,7 +55,7 @@ namespace jneoy
 
 		MonteCarloNode(const MonteCarloNode& other) = delete;
 
-		void FullyExpandChildren();
+		//void FullyExpandChildren();
 
 		MonteCarloNode* GetHighestUCTChild();
 		MonteCarloNode* GetHighestUCTChild(int beginIndex, int count);
@@ -69,5 +69,7 @@ namespace jneoy
 		virtual void BackPropagateScore(float scoreToPropagate);
 
 		void BackPropagateNewChildIncrement();
+
+		virtual int GetNumVisits() { return numVisits; }
 	};
 }

@@ -4,10 +4,10 @@
 using namespace jneoy;
 
 
-void jneoy::MonteCarloNode::FullyExpandChildren()
-{
-	while(ExpandRandomMove() != this) {}
-}
+//void jneoy::MonteCarloNode::FullyExpandChildren()
+//{
+//	//while(ExpandRandomMove() != this) {}
+//}
 
 
 MonteCarloNode* MonteCarloNode::GetHighestUCTChild()
@@ -49,8 +49,8 @@ MonteCarloNode* MonteCarloNode::GetHighestUCTChild(int beginIndex, int count)
 
 float jneoy::MonteCarloNode::GetUCT()
 {
-	float firstTerm = score / numVisits;
-	float secondTerm = log(parent->numVisits) / numVisits;
+	float firstTerm = score / GetNumVisits();
+	float secondTerm = log(parent->GetNumVisits()) / numVisits;
 	secondTerm = sqrtf(secondTerm);
 	secondTerm *= C;
 
